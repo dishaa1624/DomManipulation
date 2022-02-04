@@ -1,6 +1,8 @@
 const taskContainer = document.querySelector(".task_container");
 console.log(taskContainer);
 
+const globalStore = [];
+
 const newCard = ({id,imageurl,tasktitle,tasktype,taskdescription,}) => `<div class="col-md-6 col-lg-3" id = ${id}>
 <div class="card text-center">
     <div class="card-header d-flex justify-content-end gap-2">
@@ -20,6 +22,22 @@ const newCard = ({id,imageurl,tasktitle,tasktype,taskdescription,}) => `<div cla
   </div>
 </div>`;
 
+const loadTaskCards = () =>
+{
+    //access local storage
+    const getInitialData = localStorage.getItem("tasky");
+    if (!getInitialData) return;
+
+    //convert string to object
+     const {cards} = JSON.parse(getInitialData);
+
+    //map around the array to generate html card and inject it to DOM
+    cards.map((cardObject) => {
+        const createnewCard = newCard(cardObject);
+        taskContainer.insertAdjacentHTML("beforeend", createnewCard);
+        globalStore.push(cardObject);
+    });
+};
 
 const savechanges = () => 
 {
@@ -38,4 +56,11 @@ const savechanges = () =>
     console.log(createnewCard);
 
     taskContainer.insertAdjacentHTML("beforeend", createnewCard);
+    globalStore.push(taskdata);
+
+    //add to local storage
+    localStorage.setItem("tasky", JSON.stringify({cards : globalStore}));
 };
+
+//cards after refresh deleted -> stored in local storage(5 MB)
+//Application Programmming Interface -> API

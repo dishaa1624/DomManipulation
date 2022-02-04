@@ -1,13 +1,13 @@
 const taskContainer = document.querySelector(".task_container");
 console.log(taskContainer);
 
-const globalStore = [];
+let globalStore = [];
 
 const newCard = ({id,imageurl,tasktitle,tasktype,taskdescription,}) => `<div class="col-md-6 col-lg-3" id = ${id}>
 <div class="card text-center">
     <div class="card-header d-flex justify-content-end gap-2">
         <button type="button" class="btn btn-outline-success"><i class="fas fa-pencil"></i></button>
-        <button type="button" class="btn btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
+        <button type="button"id =${id} class="btn btn-outline-danger" onclick = "deleteCard.apply(this,arguments)"><i class="fas fa-trash-alt" id =${id} onclick = "deleteCard.apply(this,arguments)"></i></button>
     </div>
     <img src= ${imageurl} class="card-img-top" alt="...">
     <div class="card-body">
@@ -62,5 +62,24 @@ const savechanges = () =>
     localStorage.setItem("tasky", JSON.stringify({cards : globalStore}));
 };
 
+const deleteCard = (event) =>
+{
+    //id
+    event = window.event;
+    const targetId = event.target.id;
+    const tagname = event.target.tagName;
+
+    //search the global store, delete the id which matches
+    const newUpdatedArray = globalStore.filter((cardObject) => cardObject.id !== targetId);
+    globalStore = newUpdatedArray;
+    localStorage.setItem("tasky",JSON.stringify({cards:globalStore}));
+    //access DOM to remove it
+    if(tagname === "BUTTON")
+    {
+        return taskContainer.removeChild(event.target.parentNode.parentNode.parentNode);
+    }
+    return taskContainer.removeChild(event.target.parentNode.parentNode.parentNode.parentNode);
+};
+
 //cards after refresh deleted -> stored in local storage(5 MB)
-//Application Programmming Interface -> API
+//Application Programmming Interface -> API 

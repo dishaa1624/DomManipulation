@@ -17,7 +17,7 @@ const newCard = ({id,imageurl,tasktitle,tasktype,taskdescription,}) => `<div cla
       <span class="badge bg-primary float-start">${tasktype}</span>
     </div>
     <div class="card-footer text-muted">
-        <button type="button" class="btn btn-outline-primary float-end">Open Task</button>
+        <button type="button" id = ${id} class="btn btn-outline-primary float-end">Open Task</button>
     </div>
   </div>
 </div>`;
@@ -59,9 +59,13 @@ const savechanges = () =>
     globalStore.push(taskdata);
 
     //add to local storage
-    localStorage.setItem("tasky", JSON.stringify({cards : globalStore}));
+    updateLocalStorage();
+   
 };
-
+const updateLocalStorage = () =>
+{
+        localStorage.setItem("tasky", JSON.stringify({cards : globalStore}));
+};
 const deleteCard = (event) =>
 {
     //id
@@ -72,7 +76,7 @@ const deleteCard = (event) =>
     //search the global store, delete the id which matches
     const newUpdatedArray = globalStore.filter((cardObject) => cardObject.id !== targetId);
     globalStore = newUpdatedArray;
-    localStorage.setItem("tasky",JSON.stringify({cards:globalStore}));
+    updateLocalStorage();
     //access DOM to remove it
     if(tagname === "BUTTON")
     {
@@ -108,9 +112,62 @@ const editCard = (event) =>
     taskTitle.setAttribute("contenteditable", "true");
     taskType.setAttribute("contenteditable", "true");
     taskDescription.setAttribute("contenteditable", "true");
+    submitButton.setAttribute("onclick", "saveEditChanges.apply(this,arguments)");
     submitButton.innerHTML = "save changes";
 
-}
+};
+
+const saveEditChanges = (event) =>
+{
+    event = window.event;
+    const targetId = event.target.id;
+    const tagname = event.target.tagName;
+
+    let parentElement;
+    if(tagname === "BUTTON")
+    {
+        parentElement = event.target.parentNode.parentNode;
+        
+    }
+    else
+    {
+        parentElement = event.target.parentNode.parentNode.parentNode;
+       
+    }
+
+    let taskTitle = parentElement.childNodes[5].childNodes[1];
+    let taskType = parentElement.childNodes[5].childNodes[5];
+    let taskDescription = parentElement.childNodes[5].childNodes[3];
+    let submitButton = parentElement.childNodes[7].childNodes[1];
+
+    const updatedData =
+    {
+        taskTitle: taskTitle.innerHTML,
+        taskDescription: taskDescription.innerHTML,
+        taskType: taskType.innerHTML,
+    };
+    globalStore = globalStore.map((task) =>
+    {
+        if(task.id === targetId)
+        {
+            return {
+                id: task.id,
+                imageurl: task.imageurl,
+                tasktitle: updatedData.taskTitle,
+                taskdescription: updatedData.taskDescription,
+                tasktype: updatedData.taskType,
+            };
+            
+        }
+        return task;
+    });
+    updateLocalStorage();
+    taskTitle.setAttribute("contenteditable", "false");
+    taskType.setAttribute("contenteditable", "false");
+    taskDescription.setAttribute("contenteditable", "false");
+    submitButton.removeAttribute("on click");
+    submitButton.innerHTML = "Open Task";
+};
 
 //cards after refresh deleted -> stored in local storage(5 MB)
 //Application Programmming Interface -> API 
